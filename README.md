@@ -8,6 +8,7 @@ To install requirements:
 ```bash
 pip install -r requirements.txt
 ```
+
 ## Running
 To run basic transformation, run:
 ```bash
@@ -23,9 +24,10 @@ This section includes results from both transformation methods.
 ### Basic Transformation
 
 Below is a demo video of the Basic Transformation results.
-*global.gif*
+![Global Transform Demo](./global.gif)
+
 ### Point Guided Deformation
 
 Below is a demo video of the Point Guided Deformation process.
-*point.gif*
+![Global Transform Demo](./point.gif)
 
