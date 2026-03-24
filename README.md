@@ -31,3 +31,5 @@ Below is a demo video of the Basic Transformation results.
 Below is a demo video of the Point Guided Deformation process.
 ![Global Transform Demo](./point.gif)
 
+## Acknowledgement
+Thanks for the algorithms proposed by Image Deformation Using Moving Least Squares.
