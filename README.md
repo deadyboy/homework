@@ -18,4 +18,14 @@ To run point guided transformation, run:
 python run_point_transform.py
 ```
 ## Results
+This section includes results from both transformation methods.
+
+### Basic Transformation
+
+Below is a demo video of the Basic Transformation results.
+*global.gif*
+### Point Guided Deformation
+
+Below is a demo video of the Point Guided Deformation process.
+*point.gif*
 
