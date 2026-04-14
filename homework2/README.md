@@ -127,7 +127,7 @@ python train.py
 
 **验证集结果（后期 epoch）：**
 <!-- 替换路径为 val_results/epoch_295/ 中的某张图 -->
-<img src="./val_results/epoch_0/result_1.png" alt="Pix2Pix Train Early" width="800">
+<img src="./val_results/epoch_295/result_1.png" alt="Pix2Pix Train Early" width="800">
 
 <!-- 
 📌 【可选加分】：
