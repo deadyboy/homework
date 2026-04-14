@@ -119,15 +119,15 @@ python train.py
 
 **训练集结果（后期 epoch）：**
 <!-- 替换路径为 train_results/epoch_295/ 中的某张图 -->
-<img src="pics/pix2pix_train_late.png" alt="Pix2Pix Train Late" width="800">
+<img src="./train_results/epoch_295/result_1.png" alt="Pix2Pix Train Early" width="800">
 
 **验证集结果（早期 epoch）：**
 <!-- 替换路径为 val_results/epoch_0/ 中的某张图 -->
-<img src="pics/pix2pix_val_early.png" alt="Pix2Pix Val Early" width="800">
+<img src="./val_results/epoch_0/result_1.png" alt="Pix2Pix Train Early" width="800">
 
 **验证集结果（后期 epoch）：**
 <!-- 替换路径为 val_results/epoch_295/ 中的某张图 -->
-<img src="pics/pix2pix_val_late.png" alt="Pix2Pix Val Late" width="800">
+<img src="./val_results/epoch_0/result_1.png" alt="Pix2Pix Train Early" width="800">
 
 <!-- 
 📌 【可选加分】：
