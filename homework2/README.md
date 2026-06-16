@@ -73,17 +73,9 @@ python train.py --train-list train_list2.txt --val-list val_list2.txt --epochs 3
 
 #### 结果展示
 
-**融合结果 1：water 样例**
+**融合结果：water 样例（Gradio 运行截图）**
 
 <img src="pics/poisson_result1.png" alt="Poisson Blending Result 1" width="800">
-
-**融合结果 2：equation 样例（三角形）**
-
-<img src="pics/poisson_result2.png" alt="Poisson Blending Result 2" width="800">
-
-**融合结果 3：equation 样例（右侧曲线）**
-
-<img src="pics/poisson_result3.png" alt="Poisson Blending Result 3" width="800">
 
 ---
 
@@ -111,21 +103,23 @@ python train.py --train-list train_list2.txt --val-list val_list2.txt --epochs 3
 [ 输入图像 | 目标图像 | 模型输出 ]
 ```
 
+下面展示的是更大数据集 `edges2shoes` 上的结果。之前仓库中的 `train_2results/`、`val_2results/` 生成时间早于完整 64->1024 通道 U-Net 的修改时间，因此效果更像小网络训练结果；这里使用远端 `Pix2Pix/train_results/` 和 `Pix2Pix/val_results/` 中完整 U-Net 训练后的结果。
+
 **训练集结果（早期 epoch）：**
 
-<img src="./train_results/epoch_0/result_1.png" alt="Pix2Pix Train Early" width="800">
+<img src="./train_2results/epoch_0/result_1.png" alt="Edges2Shoes Train Early" width="800">
 
 **训练集结果（后期 epoch）：**
 
-<img src="./train_results/epoch_295/result_1.png" alt="Pix2Pix Train Late" width="800">
+<img src="./train_2results/epoch_295/result_1.png" alt="Edges2Shoes Train Late" width="800">
 
 **验证集结果（早期 epoch）：**
 
-<img src="./val_results/epoch_0/result_1.png" alt="Pix2Pix Val Early" width="800">
+<img src="./val_2results/epoch_0/result_1.png" alt="Edges2Shoes Val Early" width="800">
 
 **验证集结果（后期 epoch）：**
 
-<img src="./val_results/epoch_295/result_1.png" alt="Pix2Pix Val Late" width="800">
+<img src="./val_2results/epoch_295/result_1.png" alt="Edges2Shoes Val Late" width="800">
 
 ## 文件说明
 
