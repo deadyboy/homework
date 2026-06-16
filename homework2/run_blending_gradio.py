@@ -106,9 +106,7 @@ def create_mask_from_points(points, img_h, img_w):
         np.ndarray: Binary mask of shape (img_h, img_w).
     """
     mask = np.zeros((img_h, img_w), dtype=np.uint8)
-    ### FILL: Obtain Mask from Polygon Points. 
-    ### 0 indicates outside the Polygon.
-    ### 255 indicates inside the Polygon.
+    # 0 indicates outside the polygon; 255 indicates inside the polygon.
     from PIL import Image, ImageDraw as ID
     if len(points) >= 3:
         img = Image.new('L', (img_w, img_h), 0)
@@ -132,9 +130,6 @@ def cal_laplacian_loss(foreground_img, foreground_mask, blended_img, background_
         torch.Tensor: The computed Laplacian loss.
     """
     loss = torch.tensor(0.0, device=foreground_img.device)
-    ### FILL: Compute Laplacian Loss with https://pytorch.org/docs/stable/generated/torch.nn.functional.conv2d.html.
-    ### Note: The loss is computed within the masks.
-
     # Define the Laplacian kernel
     laplacian_kernel = torch.tensor([[0, 1, 0],
                                      [1, -4, 1],
@@ -155,7 +150,7 @@ def cal_laplacian_loss(foreground_img, foreground_mask, blended_img, background_
     return loss
 
 # Perform Poisson image blending
-def blending(foreground_image_original, background_image_original, dx, dy, polygon_state):
+def blending(foreground_image_original, background_image_original, dx, dy, polygon_state, iter_num=5000):
     """
     Blends the foreground polygon area onto the background image using Poisson blending.
 
@@ -165,6 +160,7 @@ def blending(foreground_image_original, background_image_original, dx, dy, polyg
         dx (int): Horizontal offset.
         dy (int): Vertical offset.
         polygon_state (dict): The current state of the polygon.
+        iter_num (int): Number of optimization steps.
 
     Returns:
         np.ndarray: The blended image as a numpy array.
@@ -201,7 +197,6 @@ def blending(foreground_image_original, background_image_original, dx, dy, polyg
     optimizer = torch.optim.Adam([blended_img], lr=1e-2)
 
     # Optimization loop
-    iter_num = 5000
     for step in range(iter_num):
         blended_img_for_loss = blended_img.detach() * (1. - bg_mask_tensor) + blended_img * bg_mask_tensor  # Only blending in the mask region
 
@@ -214,7 +209,7 @@ def blending(foreground_image_original, background_image_original, dx, dy, polyg
         if step % 50 == 0:
             print(f'Optimize step: {step}, Laplacian distance loss: {loss.item()}')
 
-        if step == int(iter_num*2/3): ### decrease learning rate at the half step
+        if step == int(iter_num*2/3):
             optimizer.param_groups[0]['lr'] *= 0.1
 
     # Convert result back to numpy array
@@ -381,5 +376,5 @@ with gr.Blocks(title="Poisson Image Blending", css="""
         outputs=output_image,
     )
 
-# Launch the Gradio app
-demo.launch()
+if __name__ == '__main__':
+    demo.launch()

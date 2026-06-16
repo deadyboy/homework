@@ -1,4 +1,6 @@
-import os
+from argparse import ArgumentParser
+from pathlib import Path
+
 import cv2
 import numpy as np
 import torch
@@ -8,6 +10,10 @@ from torch.utils.data import DataLoader
 from facades_dataset import FacadesDataset
 from FCN_network import FullyConvNetwork
 from torch.optim.lr_scheduler import StepLR
+
+
+ROOT = Path(__file__).resolve().parent
+
 
 def tensor_to_image(tensor):
     """
@@ -29,7 +35,8 @@ def tensor_to_image(tensor):
     image = (image * 255).astype(np.uint8)
     return image
 
-def save_images(inputs, targets, outputs, folder_name, epoch, num_images=5):
+
+def save_images(inputs, targets, outputs, output_dir, folder_name, epoch, num_images=5):
     """
     Save a set of input, target, and output images for visualization.
 
@@ -41,8 +48,11 @@ def save_images(inputs, targets, outputs, folder_name, epoch, num_images=5):
         epoch (int): Current epoch number.
         num_images (int): Number of images to save from the batch.
     """
-    os.makedirs(f'{folder_name}/epoch_{epoch}', exist_ok=True)
-    for i in range(num_images):
+    epoch_dir = Path(output_dir) / folder_name / f'epoch_{epoch}'
+    epoch_dir.mkdir(parents=True, exist_ok=True)
+
+    batch_count = min(num_images, inputs.shape[0])
+    for i in range(batch_count):
         # Convert tensors to images
         input_img_np = tensor_to_image(inputs[i])
         target_img_np = tensor_to_image(targets[i])
@@ -52,9 +62,10 @@ def save_images(inputs, targets, outputs, folder_name, epoch, num_images=5):
         comparison = np.hstack((input_img_np, target_img_np, output_img_np))
 
         # Save the comparison image
-        cv2.imwrite(f'{folder_name}/epoch_{epoch}/result_{i + 1}.png', comparison)
+        cv2.imwrite(str(epoch_dir / f'result_{i + 1}.png'), comparison)
 
-def train_one_epoch(model, dataloader, optimizer, criterion, device, epoch, num_epochs):
+
+def train_one_epoch(model, dataloader, optimizer, criterion, device, epoch, num_epochs, output_dir, save_every):
     """
     Train the model for one epoch.
 
@@ -82,8 +93,8 @@ def train_one_epoch(model, dataloader, optimizer, criterion, device, epoch, num_
         outputs = model(image_rgb)
 
         # Save sample images every 5 epochs
-        if epoch % 5 == 0 and i == 0:
-            save_images(image_rgb, image_semantic, outputs, 'train_results', epoch)
+        if epoch % save_every == 0 and i == 0:
+            save_images(image_rgb, image_semantic, outputs, output_dir, 'train_results', epoch)
 
         # Compute the loss
         loss = criterion(outputs, image_semantic)
@@ -98,7 +109,8 @@ def train_one_epoch(model, dataloader, optimizer, criterion, device, epoch, num_
         # Print loss information
         print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{i + 1}/{len(dataloader)}], Loss: {loss.item():.4f}')
 
-def validate(model, dataloader, criterion, device, epoch, num_epochs):
+
+def validate(model, dataloader, criterion, device, epoch, num_epochs, output_dir, save_every):
     """
     Validate the model on the validation dataset.
 
@@ -127,26 +139,61 @@ def validate(model, dataloader, criterion, device, epoch, num_epochs):
             val_loss += loss.item()
 
             # Save sample images every 5 epochs
-            if epoch % 5 == 0 and i == 0:
-                save_images(image_rgb, image_semantic, outputs, 'val_results', epoch)
+            if epoch % save_every == 0 and i == 0:
+                save_images(image_rgb, image_semantic, outputs, output_dir, 'val_results', epoch)
 
     # Calculate average validation loss
     avg_val_loss = val_loss / len(dataloader)
     print(f'Epoch [{epoch + 1}/{num_epochs}], Validation Loss: {avg_val_loss:.4f}')
 
+
+def parse_args():
+    parser = ArgumentParser(description='Train the FCN Pix2Pix model.')
+    parser.add_argument('--train-list', default='train_list.txt', help='Training image list file.')
+    parser.add_argument('--val-list', default='val_list.txt', help='Validation image list file.')
+    parser.add_argument('--output-dir', default='.', help='Directory for result images and checkpoints.')
+    parser.add_argument('--epochs', type=int, default=300)
+    parser.add_argument('--batch-size', type=int, default=8)
+    parser.add_argument('--val-batch-size', type=int, default=8)
+    parser.add_argument('--num-workers', type=int, default=4)
+    parser.add_argument('--lr', type=float, default=1e-3)
+    parser.add_argument('--save-every', type=int, default=5)
+    parser.add_argument('--checkpoint-every', type=int, default=50)
+    return parser.parse_args()
+
+
+def resolve_path(path):
+    path = Path(path)
+    return path if path.is_absolute() else ROOT / path
+
+
 def main():
     """
     Main function to set up the training and validation processes.
     """
-    # Set device to GPU if available
+    args = parse_args()
+
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    output_dir = resolve_path(args.output_dir)
 
     # Initialize datasets and dataloaders
-    train_dataset = FacadesDataset(list_file='train_list.txt')
-    val_dataset = FacadesDataset(list_file='val_list.txt')
+    train_dataset = FacadesDataset(list_file=resolve_path(args.train_list))
+    val_dataset = FacadesDataset(list_file=resolve_path(args.val_list))
 
-    train_loader = DataLoader(train_dataset, batch_size=6400, shuffle=True, num_workers=16, pin_memory=True)
-    val_loader = DataLoader(val_dataset, batch_size=200, shuffle=False, num_workers=8, pin_memory=True)
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=args.num_workers,
+        pin_memory=torch.cuda.is_available()
+    )
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=args.val_batch_size,
+        shuffle=False,
+        num_workers=args.num_workers,
+        pin_memory=torch.cuda.is_available()
+    )
 
     # Initialize model, loss function, and optimizer
     model = FullyConvNetwork().to(device)
@@ -154,25 +201,32 @@ def main():
         print(f'Using {torch.cuda.device_count()} GPUs')
         model = nn.DataParallel(model)
     criterion = nn.L1Loss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.5, 0.999))
+    optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=(0.5, 0.999))
 
     # Add a learning rate scheduler for decay
     scheduler = StepLR(optimizer, step_size=200, gamma=0.2)
 
     # Training loop
-    num_epochs = 300
+    num_epochs = args.epochs
     for epoch in range(num_epochs):
-        train_one_epoch(model, train_loader, optimizer, criterion, device, epoch, num_epochs)
-        validate(model, val_loader, criterion, device, epoch, num_epochs)
+        train_one_epoch(
+            model, train_loader, optimizer, criterion, device,
+            epoch, num_epochs, output_dir, args.save_every
+        )
+        validate(
+            model, val_loader, criterion, device,
+            epoch, num_epochs, output_dir, args.save_every
+        )
 
         # Step the scheduler after each epoch
         scheduler.step()
 
         # Save model checkpoint every 50 epochs
-        if (epoch + 1) % 50 == 0:
-            os.makedirs('checkpoints', exist_ok=True)
+        if (epoch + 1) % args.checkpoint_every == 0:
+            checkpoint_dir = output_dir / 'checkpoints'
+            checkpoint_dir.mkdir(parents=True, exist_ok=True)
             state_dict = model.module.state_dict() if isinstance(model, nn.DataParallel) else model.state_dict()
-            torch.save(state_dict, f'checkpoints/pix2pix_model_epoch_{epoch + 1}.pth')
+            torch.save(state_dict, checkpoint_dir / f'pix2pix_model_epoch_{epoch + 1}.pth')
 
 if __name__ == '__main__':
     main()

@@ -1,29 +1,28 @@
-# FILE=facades
-# URL=http://efrosgans.eecs.berkeley.edu/pix2pix/datasets/$FILE.tar.gz
-# TAR_FILE=./datasets/$FILE.tar.gz
-# TARGET_DIR=./datasets/$FILE/
-# mkdir -p $TARGET_DIR
-# echo "Downloading $URL dataset..." to $TARGET_DIR
-# wget -N $URL -O $TAR_FILE
-# mkdir -p $TARGET_DIR
-# tar -zxvf $TAR_FILE -C ./datasets/
-# rm $TAR_FILE
+#!/usr/bin/env bash
+set -euo pipefail
 
-# find "${TARGET_DIR}train" -type f -name "*.jpg" |sort -V > ./train_list.txt
-# find "${TARGET_DIR}val" -type f -name "*.jpg" |sort -V > ./val_list.txt
-FILE=$1
+DATASET="${1:-facades}"
+case "$DATASET" in
+  cityscapes|night2day|edges2handbags|edges2shoes|facades|maps) ;;
+  *)
+    echo "Available datasets: cityscapes, night2day, edges2handbags, edges2shoes, facades, maps" >&2
+    exit 1
+    ;;
+esac
 
-if [[ $FILE != "cityscapes" &&  $FILE != "night2day" &&  $FILE != "edges2handbags" && $FILE != "edges2shoes" && $FILE != "facades" && $FILE != "maps" ]]; then
-  echo "Available datasets are cityscapes, night2day, edges2handbags, edges2shoes, facades, maps"
-  exit 1
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DATA_DIR="$SCRIPT_DIR/datasets"
+TAR_FILE="$DATA_DIR/$DATASET.tar.gz"
+TARGET_DIR="$DATA_DIR/$DATASET"
+URL="http://efrosgans.eecs.berkeley.edu/pix2pix/datasets/$DATASET.tar.gz"
 
-echo "Specified [$FILE]"
+mkdir -p "$DATA_DIR"
+echo "Downloading $DATASET from $URL"
+wget -N "$URL" -O "$TAR_FILE"
+tar -zxf "$TAR_FILE" -C "$DATA_DIR"
+rm "$TAR_FILE"
 
-URL=http://efrosgans.eecs.berkeley.edu/pix2pix/datasets/$FILE.tar.gz
-TAR_FILE=./datasets/$FILE.tar.gz
-TARGET_DIR=./datasets/$FILE/
-wget -N $URL -O $TAR_FILE
-mkdir -p $TARGET_DIR
-tar -zxvf $TAR_FILE -C ./datasets/
-rm $TAR_FILE
+find "$TARGET_DIR/train" -type f \( -name "*.jpg" -o -name "*.png" \) | sort -V | sed "s#^$SCRIPT_DIR/##" > "$SCRIPT_DIR/train_list.txt"
+find "$TARGET_DIR/val" -type f \( -name "*.jpg" -o -name "*.png" \) | sort -V | sed "s#^$SCRIPT_DIR/##" > "$SCRIPT_DIR/val_list.txt"
+
+echo "Wrote train_list.txt and val_list.txt for $DATASET"
