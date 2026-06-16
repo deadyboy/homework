@@ -73,9 +73,13 @@ python train.py --train-list train_list2.txt --val-list val_list2.txt --epochs 3
 
 #### 结果展示
 
-**融合结果：water 样例（Gradio 运行截图）**
+**water 样例：输入图像与多边形选区**
 
-<img src="pics/poisson_result1.png" alt="Poisson Blending Result 1" width="800">
+<img src="pics/poisson_result1.png" alt="Poisson Blending Inputs and Polygon" width="800">
+
+**water 样例：背景选区与融合结果**
+
+<img src="pics/poisson_result2.png" alt="Poisson Blending Overlay and Result" width="800">
 
 ---
 
@@ -103,7 +107,29 @@ python train.py --train-list train_list2.txt --val-list val_list2.txt --epochs 3
 [ 输入图像 | 目标图像 | 模型输出 ]
 ```
 
-下面展示的是更大数据集 `edges2shoes` 上的结果。之前仓库中的 `train_2results/`、`val_2results/` 生成时间早于完整 64->1024 通道 U-Net 的修改时间，因此效果更像小网络训练结果；这里使用远端 `Pix2Pix/train_results/` 和 `Pix2Pix/val_results/` 中完整 U-Net 训练后的结果。
+下面分别展示作业要求的小数据集 `facades` 结果，以及额外完成的更大数据集 `edges2shoes` 结果。每组都选取早期 epoch 和后期 epoch 进行对比，展示模型训练后的改进。
+
+#### facades 小数据集结果（作业要求）
+
+**训练集结果（早期 epoch）：**
+
+<img src="./train_results/epoch_0/result_1.png" alt="Facades Train Early" width="800">
+
+**训练集结果（后期 epoch）：**
+
+<img src="./train_results/epoch_295/result_1.png" alt="Facades Train Late" width="800">
+
+**验证集结果（早期 epoch）：**
+
+<img src="./val_results/epoch_0/result_1.png" alt="Facades Val Early" width="800">
+
+**验证集结果（后期 epoch）：**
+
+<img src="./val_results/epoch_295/result_1.png" alt="Facades Val Late" width="800">
+
+#### edges2shoes 大数据集结果（额外实验）
+
+为了进一步验证模型在更大图像翻译数据集上的效果，额外使用 `edges2shoes` 数据集进行了训练与结果保存。
 
 **训练集结果（早期 epoch）：**
 
