@@ -1,8 +1,27 @@
 Dataset: data/chair from YudongGuo/DIP-Teaching Assignments/04_3DGS
-COLMAP registered images: 100
-COLMAP sparse points: 13458
-Projection debug images: 100
-Training epochs: 200
-Final logged loss: 0.0408
-Checkpoints generated: checkpoint_000000.pt through checkpoint_000180.pt every 20 epochs
-Debug images generated: epoch_0000.png through epoch_0190.png every 10 epochs
+Chair COLMAP registered images: 100
+Chair COLMAP sparse points: 13458
+Chair projection debug images: 100
+Chair simplified training epochs: 200
+Chair simplified final logged loss: 0.0408
+Chair checkpoints generated: checkpoint_000000.pt through checkpoint_000180.pt every 20 epochs
+Chair debug images generated: epoch_0000.png through epoch_0190.png every 10 epochs
+
+Dataset: data/lego from YudongGuo/DIP-Teaching Assignments/04_3DGS
+Lego COLMAP registered images: 100
+Lego COLMAP sparse points: 5704
+Lego simplified training epochs: 200
+Lego simplified final logged loss: about 0.0389
+Lego checkpoints generated: checkpoint_000000.pt through checkpoint_000180.pt every 20 epochs
+Lego debug images generated: epoch_0000.png through epoch_0190.png every 10 epochs
+
+Smoke test: SMOKE_OK cuda torch.Size([16, 16, 3])
+
+Official 3DGS comparison on data/chair
+CUDA extensions import: OK
+7000 iterations: TIME_SECONDS 90.47, MAX_RSS_KB 4018176
+30000 iterations: TIME_SECONDS 394.85, MAX_RSS_KB 4263248
+30000-iteration final training loss: about 0.0097
+Representative GPU memory probes:
+Simplified 5-epoch chair probe: about 3.35 GiB, 72.09s
+Official short training probe: about 2.1 GiB
