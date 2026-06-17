@@ -1,0 +1,13 @@
+Remote workdir: /data3/jianf/homework4_3dgs/DIP-Teaching/Assignments/04_3DGS
+Environment: /data3/jianf/.micromamba/envs/codex_dip_homework4_3dgs_colmap_pytorch_cuda_h100_20260617
+Dataset: data/chair from YudongGuo/DIP-Teaching Assignments/04_3DGS
+COLMAP registered images: 100
+COLMAP sparse points: 13458
+Projection debug images: 100
+Training epochs: 200
+Final logged loss: 0.0408
+Checkpoints generated remotely: checkpoint_000000.pt through checkpoint_000180.pt every 20 epochs
+Debug images generated remotely: epoch_0000.png through epoch_0190.png every 10 epochs
+Packaged videos:
+- videos/debug_rendering.mp4
+- videos/chair_render_mv.mp4
