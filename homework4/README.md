@@ -2,7 +2,7 @@
 
 ## 简介
 
-本目录完成 DIP 课程 Homework4：使用 COLMAP 从多视角图像恢复相机和稀疏点云，并用纯 PyTorch 实现一个简化版 3D Gaussian Splatting renderer。实验在 H100 服务器完成，主数据集使用课程提供的 `chair`。
+本目录完成 DIP 课程 Homework4：使用 COLMAP 从多视角图像恢复相机和稀疏点云，并用纯 PyTorch 实现一个简化版 3D Gaussian Splatting renderer。主数据集使用课程提供的 `chair`。
 
 参考作业目录：[YudongGuo/DIP-Teaching - Assignments/04_3DGS](https://github.com/YudongGuo/DIP-Teaching/tree/main/Assignments/04_3DGS)
 
@@ -19,22 +19,18 @@ homework4/
 ├── render_3dgs_mv.py              # 训练后水平环绕视角渲染
 ├── smoke_test_3dgs.py             # 核心张量前向 smoke test
 ├── pics/                          # README 展示图
-├── videos/                        # 渲染视频
-└── logs/run_summary.txt           # 远端运行摘要
+└── logs/run_summary.txt           # 运行摘要
 ```
 
 ## 环境与运行
 
-本次实验在 H100 服务器上使用项目专用 micromamba 环境运行：
+本次实验使用独立 Python 环境运行。关键依赖包括 `COLMAP 3.13.0`、`PyTorch 2.11.0+cu128`、`OpenCV 4.13.0`、`natsort`、`tqdm`。注意 COLMAP 3.13 的 GPU 参数名是 `FeatureExtraction.use_gpu` 和 `FeatureMatching.use_gpu`，因此我更新了原脚本中的旧参数名。
 
 ```bash
-export MAMBA_ROOT_PREFIX=/data3/jianf/.micromamba
-ENV_NAME=codex_dip_homework4_3dgs_colmap_pytorch_cuda_h100_20260617
-ENV_PREFIX=/data3/jianf/.micromamba/envs/${ENV_NAME}
-export LD_LIBRARY_PATH="${ENV_PREFIX}/lib:${LD_LIBRARY_PATH:-}"
+conda create -n dip_hw4_3dgs python=3.10 colmap opencv natsort tqdm imageio imageio-ffmpeg ffmpeg numpy scipy -c conda-forge
+conda activate dip_hw4_3dgs
+python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
 ```
-
-关键依赖包括 `COLMAP 3.13.0`、`PyTorch 2.11.0+cu128`、`OpenCV 4.13.0`、`natsort`、`tqdm`。注意 COLMAP 3.13 的 GPU 参数名是 `FeatureExtraction.use_gpu` 和 `FeatureMatching.use_gpu`，因此我更新了原脚本中的旧参数名。
 
 运行顺序：
 
@@ -47,13 +43,6 @@ python train.py --colmap_dir data/chair \
   --num_epochs 200 \
   --debug_every 10 \
   --debug_samples 4 \
-  --device cuda
-python render_3dgs_mv.py \
-  --colmap_dir data/chair \
-  --checkpoint outputs/chair_checkpoints/checkpoint_000180.pt \
-  --output outputs/chair_render_mv.mp4 \
-  --num_frames 240 \
-  --fps 30 \
   --device cuda
 ```
 
@@ -108,11 +97,6 @@ python render_3dgs_mv.py \
 
 训练 200 个 epoch 后，日志中的最后 loss 约为 `0.0408`。可以看到模型从初始模糊 Gaussian blob 逐渐学到了椅子的主体结构和绿色纹理，但由于没有 densification 和高效 rasterization，边缘仍有明显拖影，细节也弱于官方 3DGS。
 
-视频结果：
-
-- [训练视角渲染视频](videos/debug_rendering.mp4)
-- [水平环绕视角视频](videos/chair_render_mv.mp4)
-
 ## 验证
 
 已完成的验证：
@@ -125,8 +109,6 @@ Smoke test: SMOKE_OK cuda torch.Size([16, 16, 3])
 Training epochs: 200
 Final logged loss: 0.0408
 Generated checkpoint: outputs/chair_checkpoints/checkpoint_000180.pt
-Generated debug video: outputs/chair_checkpoints/debug_rendering.mp4
-Generated orbit video: outputs/chair_render_mv.mp4
 ```
 
 官方 3DGS 对比没有在本次提交中完整复现，原因是官方实现需要额外 CUDA extension / rasterizer 环境；本 README 在实现说明和结果分析中已明确说明简化版与官方版的主要差异。

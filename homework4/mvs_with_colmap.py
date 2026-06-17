@@ -2,7 +2,7 @@ import os
 import subprocess
 import argparse
 
-# Allow COLMAP (Qt-based) to run on headless servers without an X display.
+# Allow COLMAP (Qt-based) to run in headless environments without an X display.
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 
 if __name__ == '__main__':
